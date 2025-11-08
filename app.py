@@ -4,9 +4,16 @@ import os
 
 app = Flask(__name__)
 
+def get_ssh_status():
+    try:
+        result = subprocess.check_output(['pgrep', 'sshd']).decode().strip()
+        return f"Active (PID: {result})" if result else "Not running"
+    except:
+        return "Not running"
+
 @app.route('/')
 def home():
-    return "<h1>VPS Free + SSH + Cron nội bộ</h1><p>SSH: xem Logs</p>"
+    return "<h1>VPS Free + SSH + Cron</h1><p>Check /status</p>"
 
 @app.route('/ping')
 def ping():
@@ -17,7 +24,7 @@ def ping():
 @app.route('/status')
 def status():
     uptime = os.popen('uptime -p').read().strip()
-    ssh_status = os.popen('service ssh status | grep Active').read().strip()
+    ssh_status = get_ssh_status()
     return f"""
     <pre>
     VPS Status: ONLINE
