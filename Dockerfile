@@ -1,12 +1,16 @@
 FROM ubuntu:22.04
 
-# Cài đặt hệ thống + cron
+# Cài đặt hệ thống + SSH + cron + tools
 RUN apt-get update && \
     apt-get install -y openssh-server python3 python3-pip curl nano vim htop net-tools git cron && \
-    mkdir /var/run/sshd && \
+    mkdir -p /var/run/sshd && \
+    mkdir -p /var/log && \
     echo 'root:admin123' | chpasswd && \
-    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#Port 22/Port 22/' /etc/ssh/sshd_config && \
+    # Tạo host keys (rất quan trọng!)
+    ssh-keygen -A && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Cài Python app
@@ -30,10 +34,8 @@ RUN chmod +x /start.sh
 RUN chmod 0644 /etc/cron.d/keepalive
 RUN crontab /etc/cron.d/keepalive
 
-# Tạo log file
-RUN mkdir -p /var/log && touch /var/log/ngrok.log && chmod 666 /var/log/ngrok.log
-
-# XÓA DÒNG COPY ngrok.yml (không cần nữa)
+# Tạo log + quyền
+RUN touch /var/log/sshd.log && chmod 666 /var/log/sshd.log
 
 EXPOSE 10000 22
 
