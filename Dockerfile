@@ -26,9 +26,13 @@ RUN curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | \
 COPY start.sh /start.sh
 COPY cron-keepalive /etc/cron.d/keepalive
 COPY ngrok.yml /root/.ngrok2/ngrok.yml
+
 RUN chmod +x /start.sh
 RUN chmod 0644 /etc/cron.d/keepalive
 RUN crontab /etc/cron.d/keepalive
+
+# Tạo log file trước
+RUN mkdir -p /var/log && touch /var/log/ngrok.log && chmod 666 /var/log/ngrok.log
 
 EXPOSE 10000 22
 
